@@ -1,0 +1,11 @@
+http:
+  myhost: "localhost"
+  myport: "8081"
+  
+  externalhost: "api.openweathermap.org"
+  
+  coordinates:
+    path: "/geo/1.0/direct"
+    
+  weather:
+    path: "/data/2.5/weather"

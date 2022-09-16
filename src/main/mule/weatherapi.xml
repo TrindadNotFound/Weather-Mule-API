@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="weatherapiFlow" doc:id="3f87f298-f564-4ed1-96e0-282789b6dc5b" >
+		<http:listener doc:name="Listener" doc:id="7d87f660-e569-4554-85ee-18d6a94c46f4" path="/weather" config-ref="HTTP_Listener_config" allowedMethods="GET"/>
+		<set-variable value="#[attributes.queryParams.appid]" doc:name='var "appid"' doc:id="e55af3b1-571c-4c9d-a911-0f336d6ae261" variableName="appid" />
+		<flow-ref doc:name="getCoordinates" doc:id="cc112623-213f-431f-8473-511cfa31d8ca" name="getCoordinates"/>
+		<set-variable value="#[payload.lat]" doc:name='var "lat"' doc:id="077ab4cb-a05a-4e75-94ec-5b1b4b2a3ecf" variableName="lat"/>
+		<set-variable value="#[payload.lon]" doc:name='var "lon"' doc:id="593266e7-3c4b-4c26-a196-3ee4ed148d4b" variableName="lon"/>
+		<flow-ref doc:name="getWeather" doc:id="caa2af8c-10a8-4720-b19d-0725fadcb1d4" name="getWeather"/>
+	</flow>
+	<sub-flow name="getCoordinates" doc:id="34e6bb5d-e6e1-4813-aeba-9c93a5fbbf17" >
+		<http:request method="GET" doc:name="Request" doc:id="f8047a43-ad5c-40e6-8bf7-c147c0ac2bc5" config-ref="HTTPRequest" path="${http.coordinates.path}">
+			<http:query-params><![CDATA[#[output application/java
+---
+{
+	"appid" : attributes.queryParams.appid,
+	"q" : attributes.queryParams.q
+}]]]></http:query-params>
+		</http:request>
+		<set-payload value='#[{"lat":payload.lat[0], "lon":payload.lon[0]}]' doc:name="Set Payload" doc:id="d508b6d0-784b-464c-8e50-850838acfb54" />
+	</sub-flow>
+	<sub-flow name="getWeather" doc:id="52ed258a-efdb-4858-9d79-80b7bee79277" >
+		<http:request method="GET" doc:name="Request" doc:id="9f2f8483-878f-4182-b846-33af5f7f4696" config-ref="HTTPRequest" path="${http.weather.path}">
+			<http:query-params><![CDATA[#[output application/java
+---
+{
+	"appid" : vars.appid,
+	"lat" : vars.lat,
+	"lang" : "pt",
+	"lon" : vars.lon,
+	"units" : "metric"
+}]]]></http:query-params>
+		</http:request>
+		<choice doc:name="Choice" doc:id="feb57d2a-bb44-466e-a6f2-dedab08f5377" >
+			<when expression="#[payload.main.temp &lt; 30.00]">
+				<set-payload value='#[%dw 2.0&#10;output application/json&#10;&#10;import capitalize from dw::core::Strings&#10;---&#10;{&#10;	"Temperatura": payload.main.temp as Number,&#10;	"Estado do tempo": capitalize(payload.weather[0].description) as String,&#10;	"Observação": "Temperautra baixa. Possibilidade de formação de gelo" as String&#10;}]' doc:name="Fromação de gelo" doc:id="5a41c44d-d137-4f64-88d9-0afccd9f5914" />
+			</when>
+			<otherwise >
+				<set-payload value='#[%dw 2.0&#10;output application/json&#10;&#10;import capitalize from dw::core::Strings&#10;---&#10;{&#10;	"Temperatura": payload.main.temp as Number,&#10;	"Estado do tempo": capitalize(payload.weather[0].description) as String&#10;}]' doc:name="Set Payload" doc:id="ca69920d-f722-4d9f-98bb-3d07236009fa" />
+			</otherwise>
+		</choice>
+	</sub-flow>
+</mule>
