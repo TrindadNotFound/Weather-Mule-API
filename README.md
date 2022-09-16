@@ -14,7 +14,7 @@ Para o segundo Request, é então utilizado os valores da longitude e da latitud
 Como resposta iremos ter um novo JSON Object onde constam diversas informações sobre a temperatura que se faz sentir na cidade mencionada.
 
 
-##Intalação
+## Intalação
 Numa primeira fase, é necessario proceder ao registo no site da WeatherAPI e obter a respectiva API Key.
 De seguida, deve ser importado o ficheiro .zip do projeto mulesoft para o Anypoint Studio.
 Após importação basta executar a API e proceder à chamada da mesma.
