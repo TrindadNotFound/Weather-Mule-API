@@ -37,7 +37,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 }]]]></http:query-params>
 		</http:request>
 		<choice doc:name="Choice" doc:id="feb57d2a-bb44-466e-a6f2-dedab08f5377" >
-			<when expression="#[payload.main.temp &lt; 30.00]">
+			<when expression="#[payload.main.temp &lt; 3]">
 				<set-payload value='#[%dw 2.0&#10;output application/json&#10;&#10;import capitalize from dw::core::Strings&#10;---&#10;{&#10;	"Temperatura": payload.main.temp as Number,&#10;	"Estado do tempo": capitalize(payload.weather[0].description) as String,&#10;	"Observação": "Temperautra baixa. Possibilidade de formação de gelo" as String&#10;}]' doc:name="Fromação de gelo" doc:id="5a41c44d-d137-4f64-88d9-0afccd9f5914" />
 			</when>
 			<otherwise >
